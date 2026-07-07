@@ -36,9 +36,12 @@ public class SecurityConfig {
                         // Permite el login y todo lo que esté bajo /api/auth/
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // ⚠️ EL AJUSTE CLAVE: Asegurémonos de que permita explícitamente /api/rifas y
+                        // EL AJUSTE CLAVE: Asegurémonos de que permita explícitamente /api/rifas y
                         // subrutas
                         .requestMatchers("/api/rifas", "/api/rifas/**").authenticated()
+                        
+                        // Se agrega la disponibilidad de que cualquier ruta bajo /api/boletos/ requiera autenticación
+                        .requestMatchers("/api/boletos/**").authenticated()
 
                         // Cualquier otra petición aleatoria también requerirá token
                         .anyRequest().authenticated())
