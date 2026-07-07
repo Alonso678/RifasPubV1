@@ -1,35 +1,33 @@
 package com.rifas.v1.backend_rifas.controller;
 
+import com.rifas.v1.backend_rifas.model.Rifa;
+import com.rifas.v1.backend_rifas.service.RifaService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rifas")
 public class RifaController {
 
+    private final RifaService rifaService;
+
+    public RifaController(RifaService rifaService) {
+        this.rifaService = rifaService;
+    }
+
+    // 1. GET: Listar todas las rifas de la BD reales
     @GetMapping
-    public ResponseEntity<?> listarRifas() {
-        // Datos de prueba simulados para comprobar que la seguridad te deja pasar
-        List<Map<String, Object>> rifasSimuladas = List.of(
-            Map.of(
-                "id", 1, 
-                "titulo", "Rifa de Computadora Gamer de Escritorio", 
-                "precioBoleto", 50.0, 
-                "estado", "ACTIVA"
-            ),
-            Map.of(
-                "id", 2, 
-                "titulo", "Rifa de iPhone 15 Pro Max", 
-                "precioBoleto", 25.0, 
-                "estado", "PROXIMAMENTE"
-            )
-        );
-        
-        return ResponseEntity.ok(rifasSimuladas);
+    public ResponseEntity<List<Rifa>> listarRifas() {
+        List<Rifa> rifas = rifaService.obtenerTodasLasRifas();
+        return ResponseEntity.ok(rifas);
+    }
+
+    // 2. POST: Crear una nueva rifa desde Postman (Útil para poblar la BD)
+    @PostMapping
+    public ResponseEntity<Rifa> crearRifa(@RequestBody Rifa rifa) {
+        Rifa nuevaRifa = rifaService.guardarRifa(rifa);
+        return ResponseEntity.ok(nuevaRifa);
     }
 }
