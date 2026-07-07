@@ -1,5 +1,6 @@
 package com.rifas.v1.backend_rifas.controller;
 
+import com.rifas.v1.backend_rifas.utils.security.JwtUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,9 +14,11 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils; // 1. Inyectamos la utilidad de JWT
 
-    public AuthController(AuthenticationManager authenticationManager) {
+    public AuthController(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping("/login")
@@ -24,14 +27,19 @@ public class AuthController {
         String password = loginRequest.get("password");
 
         try {
-            // Spring Security se encarga de ir a buscar el usuario a Neon y verificar la contraseña con BCrypt
+            // Spring Security valida contra Neon que las credenciales sean correctas
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
 
+            // 2. Si la autenticación fue exitosa, generamos su Token JWT real
+            String token = jwtUtils.generateToken(authentication.getName());
+
+            // 3. Devolvemos el token estructurado al cliente
             return ResponseEntity.ok(Map.of(
                 "status", "success",
-                "message", "¡Autenticación exitosa, Alonso!",
+                "message", "¡Autenticación exitosa!",
+                "token", token, // El frontend guardará este string largo
                 "user", authentication.getName()
             ));
 
