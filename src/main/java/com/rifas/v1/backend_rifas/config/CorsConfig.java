@@ -27,14 +27,30 @@ public class CorsConfig {
     @Value("${cors.max-age:3600}")
     private long maxAge;
 
+    // @Bean
+    // public CorsConfigurationSource corsConfigurationSource() {
+    //     CorsConfiguration configuration = new CorsConfiguration();
+    //     configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+    //     configuration.setAllowedMethods(Arrays.asList(allowedMethods.split(",")));
+    //     configuration.setAllowedHeaders(Arrays.asList(allowedHeaders.split(",")));
+    //     configuration.setAllowCredentials(allowCredentials);
+    //     configuration.setMaxAge(maxAge);
+
+    //     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    //     source.registerCorsConfiguration("/**", configuration);
+    //     return source;
+    // }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        configuration.setAllowedMethods(Arrays.asList(allowedMethods.split(",")));
-        configuration.setAllowedHeaders(Arrays.asList(allowedHeaders.split(",")));
-        configuration.setAllowCredentials(allowCredentials);
-        configuration.setMaxAge(maxAge);
+        // 🚨 Permitimos tanto el 5173 como el 5174 para evitar bloqueos por cambios de
+        // puerto
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

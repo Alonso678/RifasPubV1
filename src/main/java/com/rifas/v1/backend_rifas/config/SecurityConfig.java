@@ -34,8 +34,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 🚨 PERMITIR PREFLIGHT
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/rifas", "/api/rifas/**").authenticated()
+                        .requestMatchers("/api/rifas", "/api/rifas/**").permitAll() // Déjalas en permitAll temporalmente si el catálogo es público
                         .requestMatchers("/api/boletos/**").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

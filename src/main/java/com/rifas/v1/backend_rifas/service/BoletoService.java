@@ -33,7 +33,14 @@ public class BoletoService {
     // 2. Proceso de Compra de Boleto (Transaccional para asegurar consistencia)
     @Transactional
     public Boleto comprarBoleto(Long rifaId, Integer numeroBoleto, String emailUsuario) {
-        
+
+        // 🚨 CORREGIDO: Usando los parámetros reales del método
+        System.out.println("========== [LOG BACKEND] INICIANDO PROCESO DE COMPRA ==========");
+        System.out.println("Rifa ID solicitada: " + rifaId);
+        System.out.println("Número de Boleto solicitado: " + numeroBoleto);
+        System.out.println("Comprador (extraído del JWT): " + emailUsuario);
+        System.out.println("===============================================================");
+
         // Validar si la rifa existe
         Rifa rifa = rifaRepository.findById(rifaId)
                 .orElseThrow(() -> new RuntimeException("Error: La rifa no existe"));
@@ -62,6 +69,18 @@ public class BoletoService {
         nuevoBoleto.setRifa(rifa);
         nuevoBoleto.setUsuario(usuario);
 
-        return boletoRepository.save(nuevoBoleto);
+        // 🚨 Agregamos el estado por defecto que guardas en la BD (ej: "CONFIRMADO") si
+        // tu entidad lo requiere
+        nuevoBoleto.setEstado("CONFIRMADO");
+
+        Boleto boletoGuardado = boletoRepository.save(nuevoBoleto);
+
+        // 🚨 LOG DE VERIFICACIÓN POST-GUARDADO
+        System.out.println("========== [LOG BACKEND] GUARDADO EXITOSO ==========");
+        System.out.println("Boleto guardado con ID asignado: " + boletoGuardado.getId());
+        System.out.println("Para el usuario ID: " + boletoGuardado.getUsuario().getId());
+        System.out.println("====================================================");
+
+        return boletoGuardado;
     }
 }

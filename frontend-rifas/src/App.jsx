@@ -23,13 +23,21 @@ export default function App() {
 
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
+      
+      // 🚨 RADAR DE RESPUESTA CRUDA: Capturamos el texto antes de intentar parsear como JSON
+      const textData = await response.text();
+      console.log(`[LOG FRONTEND] Respuesta cruda de ${endpoint} (Status: ${response.status}):`, textData);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error: ${response.status}`);
+        let parsedError = {};
+        try { parsedError = JSON.parse(textData); } catch(e) {}
+        throw new Error(parsedError.error || `Error del servidor: ${response.status}`);
       }
-      return await response.json();
+
+      // Si viene vacío (como un String o HTTP 204), retornamos un objeto vacío para no romper JSON.parse
+      return textData ? JSON.parse(textData) : {};
     } catch (e) {
-      console.warn(`Error en API (${endpoint}):`, e.message);
+      console.warn(`🚨 Error detectado en la llamada API (${endpoint}):`, e.message);
       throw e;
     }
   }, [token]);
@@ -120,10 +128,8 @@ export default function App() {
 
   return (
     <AuthContext.Provider value={{ user, token, backendConnected, loginExpress, registrarExpress, logout, apiFetch }}>
-      {/* Contenedor Base oscuro simulado con estilos Bootstrap integrados */}
       <div className="min-vh-screen text-light flex flex-column" style={{ backgroundColor: '#0b0f19', minHeight: '100vh' }}>
         
-        {/* Navbar Bootstrap */}
         <header className="navbar navbar-expand border-bottom px-4 py-3" style={{ backgroundColor: '#101626', borderColor: '#1e293b !important' }}>
           <div className="container-fluid d-flex justify-content-between align-items-center">
             <div className="navbar-brand d-flex align-items-center gap-2 m-0 text-white font-weight-bold" style={{ cursor: 'pointer' }} onClick={() => setCurrentScreen('catalog')}>
@@ -154,7 +160,6 @@ export default function App() {
           </div>
         </header>
 
-        {/* Contenido Principal */}
         <main className="container flex-grow-1 my-4" style={{ maxWidth: '850px' }}>
           {loading ? (
             <div className="d-flex justify-content-center align-items-center" style={{ height: '250px' }}>
@@ -218,7 +223,7 @@ function RafflesCatalog({ raffles, onSelectRaffle }) {
                   </div>
                 </div>
 
-                <button onClick={() => onSelectRaffle(raffle)} class="btn btn-primary w-full mt-4 py-2 fw-bold small" style={{ borderRadius: '0.75rem', fontSize: '13px' }}>
+                <button onClick={() => onSelectRaffle(raffle)} className="btn btn-primary w-100 mt-4 py-2 fw-bold small" style={{ borderRadius: '0.75rem', fontSize: '13px' }}>
                   Elegir Números 🎰
                 </button>
               </div>
@@ -261,9 +266,10 @@ function RaffleDetail({ raffle, onBack, onSuccess }) {
     setErrorMsg('');
     try {
       if (backendConnected) {
+        // 🚨 CAMBIO DE PROPIEDAD: Corregido de 'raffleId' a 'rifaId' para hacer match con ejecutarAutenticacionExpress
         await apiFetch('/boletos/comprar', {
           method: 'POST',
-          body: JSON.stringify({ raffleId: raffle.id, numeroBoleto: selectedNum })
+          body: JSON.stringify({ rifaId: raffle.id, numeroBoleto: selectedNum })
         });
       }
       onSuccess(selectedNum);
@@ -330,7 +336,6 @@ function RaffleDetail({ raffle, onBack, onSuccess }) {
         <p className="text-secondary small mt-1">Selecciona cualquiera de las casillas verdes. Las grises ya pertenecen a otro participante.</p>
       </div>
 
-      {/* Grid de números con Bootstrap */}
       <div className="card text-light border-secondary border-opacity-25 p-4 shadow-lg mb-4" style={{ backgroundColor: '#111827', borderRadius: '1rem' }}>
         <div className="row g-2 overflow-auto" style={{ maxHeight: '320px' }}>
           {Array.from({ length: 100 }).map((_, i) => {
@@ -381,7 +386,6 @@ function RaffleDetail({ raffle, onBack, onSuccess }) {
         </div>
       </div>
 
-      {/* MODAL EXPRESS EN BOOTSTRAP (Renderizado controlado) */}
       {showModal && (
         <div className="modal d-block" style={{ backgroundColor: 'rgba(8, 11, 19, 0.85)', backdropFilter: 'blur(4px)' }} tabIndex="-1">
           <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '360px' }}>
@@ -394,7 +398,6 @@ function RaffleDetail({ raffle, onBack, onSuccess }) {
               <div className="modal-body p-2">
                 <p className="text-secondary small mb-3">Apartarás de forma inmediata el boleto <span className="text-warning fw-bold">#{selectedNum?.toString().padStart(2, '0')}</span> en Neon.</p>
 
-                {/* Alternador Registro/Login */}
                 <div className="row g-0 p-1 bg-dark rounded-3 border border-secondary border-opacity-25 mb-3 text-center" style={{ fontSize: '12px' }}>
                   <div className="col-6">
                     <button onClick={() => setModalMode('register')} className={`btn btn-sm w-100 fw-bold border-0 text-white ${modalMode === 'register' ? 'btn-primary' : 'btn-link text-decoration-none text-secondary'}`} style={{ borderRadius: '0.5rem' }}>Registrarme</button>
@@ -445,7 +448,6 @@ function SuccessScreen({ raffle, ticketNumber, onClose }) {
         <p className="text-success small fw-semibold mt-1">El boleto ha sido guardado de forma permanente en tu cuenta</p>
       </div>
 
-      {/* Ticket Virtual */}
       <div className="card text-light border-primary border-opacity-25 w-100 shadow-lg position-relative" style={{ backgroundColor: '#111827', borderRadius: '1.25rem', border: '2px solid rgba(13, 110, 253, 0.2)' }}>
         <div className="px-4 py-3 border-bottom border-secondary border-dashed text-start">
           <span className="text-primary uppercase fw-bold tracking-wider d-block" style={{ fontSize: '10px' }}>Sorteo Activo</span>

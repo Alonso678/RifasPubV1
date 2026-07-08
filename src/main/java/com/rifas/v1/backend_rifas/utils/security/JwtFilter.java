@@ -33,6 +33,13 @@ public class JwtFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
+        final String path = request.getRequestURI();
+
+        // Permitir el acceso a las rutas de autenticación sin necesidad de token
+        if (path.startsWith("/api/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 1. Si no viene el token en los Headers, ignoramos y continuamos el flujo de filtros
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
