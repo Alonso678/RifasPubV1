@@ -15,10 +15,10 @@ import java.util.function.Function;
 public class JwtUtils {
 
     // Spring inyectará automáticamente los valores desde tu .env / application.properties
-    @Value("${JWT_SECRET}")
+    @Value("${app.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${JWT_EXPIRATION}")
+    @Value("${app.jwt.expiration}")
     private Long jwtExpiration;
 
     // Genera una clave segura a partir del String del .env

@@ -31,12 +31,12 @@ public class Boleto {
     private LocalDateTime compradoEn;
 
     // Relación: Muchas boletos pertenecen a una Rifa
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rifa_id", nullable = false)
     private Rifa rifa;
 
     // Relación: Muchos boletos pertenecen a un Usuario (Comprador)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 

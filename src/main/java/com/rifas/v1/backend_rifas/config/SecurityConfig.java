@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // 🚨 PERMITIR PREFLIGHT
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/rifas", "/api/rifas/**").permitAll() // Déjalas en permitAll temporalmente si el catálogo es público
-                        .requestMatchers("/api/boletos/**").authenticated()
+                        .requestMatchers("/api/boletos/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
